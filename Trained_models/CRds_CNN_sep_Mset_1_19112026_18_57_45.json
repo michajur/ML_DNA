@@ -1,0 +1,46 @@
+{
+    "model": "CRds_CNN",
+    "model_family": "cr_ds",
+    "with_seq": false,
+    "y_form": "separate",
+    "model_parameters": {
+        "hidden_sizes": [
+            128,
+            64
+        ],
+        "logits_dropout": 0.0,
+        "detach_logits": false,
+        "conv_channels": [
+            16,
+            32,
+            64
+        ],
+        "kern_sizes": [
+            [
+                3,
+                3
+            ],
+            [
+                3,
+                3
+            ],
+            [
+                3,
+                3
+            ]
+        ],
+        "pool_bias": false,
+        "pool_act": null,
+        "pool_normW": false
+    },
+    "loss_function": "CRConsistency",
+    "loss_parameters": {
+        "consistency_weight": 0.15
+    },
+    "test_pred_config": {
+        "sep_nts": true,
+        "ds_out": true
+    },
+    "training_time": 1847.5656719207764,
+    "test_accuracy": 0.2709903846153846
+}

@@ -1,0 +1,7 @@
+__pycache__/
+.ipynb_checkpoints/
+.vscode/
+model_dist_v1.ipynb
+TODO.txt
+old_stuff.py
+dist_mat_sample100/
