@@ -287,15 +287,17 @@ def upper_triangle_to_vector(arr):
 
 
 
-def Standarize_inplace(x):
-    '''
-    x -- np.array
-    '''
-    m = x.mean()
-    std = x.std()
+def Standarize_inplace(x, train_idx):
+    """
+    Standardize an array in place using training samples only.
+    """
+    m = x[train_idx].mean()
+    std = x[train_idx].std()
 
     x -= m
     x /= std
+
+    return m, std
 
 
 
