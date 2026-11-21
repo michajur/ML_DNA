@@ -137,8 +137,9 @@ def Train_Test_Indices(index_ranges, mode, train_fraction, seed=42):
     if mode == "random":
         n = max(index_ranges.values())[1]
         split_info = None
+        train_indices, test_indices = _split_indices(n)
         
-        return _split_indices(n), split_info
+        return train_indices, test_indices, split_info
     
     elif mode == "by_hexamer":
         # hexamer and its corresponding complementary reversed 
@@ -166,6 +167,98 @@ def Train_Test_Indices(index_ranges, mode, train_fraction, seed=42):
         rng.shuffle(test_indices)
 
         return np.array(train_indices), np.array(test_indices), split_info
+
+    else:
+        raise ValueError("Split mode must be 'random' or 'by_hexamer'.")
+
+
+
+def Train_Val_Test_Indices(index_ranges, mode, train_fraction, val_fraction=0.1, seed=42):
+    """
+    Prepares indices in range: (0 -- number of samples) shuffled and splited 
+    into train, test and validation sets. Works in two modes:
+    1. random -- indices are splited bewteen train and test completely randomly 
+    2. by_hexamer -- blocks of indices corresponding to given hexamer are randomly
+    splited between train and test; random split takes place on level of hexamers, 
+    not individual samples.
+
+    Input:
+    index_ranges -- dictionary with index ranges for all hexamers
+    mode -- either 'random' or 'by_hexamer'
+    seed -- random seed for reproducibility (default: 42)
+
+    Returns:
+    train_indices, test_indices -- shuffled indices of train / test set samples 
+    split_info -- only in 'by_hexamer' mode (None in 'random'). Contains information
+    which hexamers ended up in train and test sets.
+    """
+    rng = np.random.default_rng(seed=seed)
+
+    if 1 - train_fraction < val_fraction:
+        raise ValueError("Validation fraction can't be larger that 1-train_fraction.")
+    elif 1 - train_fraction - val_fraction < 0.1:
+        print("Warning! Test set consist 10% or less of the total samples.\
+              Reduce train_fraction or val_fraction to increase test set.")
+    else:
+        pass
+    
+    def _split_indices(n):
+        """
+        n - int
+        
+        Returns indicies in range: 0 -- n splited into two sets: 
+        train (size = n * TRAIN_SIZE) and test (size = n * (1 - TRAIN_SIZE))
+        """
+    
+        all_inds = np.arange(0, n)
+        rng.shuffle(all_inds)
+        n_train = int(n * train_fraction)
+        n_train_val = int(n * (train_fraction + val_fraction))
+        train_inds = all_inds[:n_train]
+        val_inds = all_inds[n_train:n_train_val]
+        test_inds = all_inds[n_train_val:]
+    
+        return train_inds, val_inds, test_inds
+    
+    if mode == "random":
+        n = max(index_ranges.values())[1]
+        split_info = None
+        train_indices, val_indices, test_indices = _split_indices(n)
+        
+        return train_indices, val_indices, test_indices, split_info
+    
+    elif mode == "by_hexamer":
+        # hexamer and its corresponding complementary reversed 
+        # hexamer shouldn't be splited between train and test
+
+        n = len(index_ranges)
+        hex_train_indices, hex_val_indices, hex_test_indices = _split_indices(n)
+    
+        train_indices = []
+        val_indices = []
+        test_indices = []
+        split_info = {
+            "train": [], 
+            "validation": [],
+            "test": []
+        }
+        
+        for i, (k, v) in enumerate(index_ranges.items()):
+            if i in hex_train_indices:
+                train_indices += np.arange(v[0], v[1]).tolist()
+                split_info["train"].append(k)
+            elif i in hex_val_indices:
+                val_indices += np.arange(v[0], v[1]).tolist()
+                split_info["validation"].append(k)
+            else:
+                test_indices += np.arange(v[0], v[1]).tolist()
+                split_info["test"].append(k)
+    
+        rng.shuffle(train_indices)
+        rng.shuffle(val_indices)
+        rng.shuffle(test_indices)
+
+        return np.array(train_indices), np.array(val_indices), np.array(test_indices), split_info
 
     else:
         raise ValueError("Split mode must be 'random' or 'by_hexamer'.")
@@ -210,7 +303,7 @@ class DataSet:
     """
     Object creates and stores train and test data loaders.
     """
-    def __init__(self, X, y, train_idx, test_idx, batch_size=32):
+    def __init__(self, X, y, train_idx, test_idx, val_idx=None, batch_size=32):
         if isinstance(X, torch.Tensor):
             self.X = [X]
         elif isinstance(X, list):
@@ -228,14 +321,21 @@ class DataSet:
 
         self.train_idx = np.asarray(train_idx)
         self.test_idx = np.asarray(test_idx)
+        self.val_idx = np.asarray(val_idx) if val_idx is not None else None
         self.batch_size = batch_size
 
         tensorset_full = TensorDataset(*self.X, self.y)
         tensorset_train = Subset(tensorset_full, self.train_idx)
         tensorset_test = Subset(tensorset_full, self.test_idx)
+        if self.val_idx is not None:
+            tensorset_val = Subset(tensorset_full, self.val_idx)
         
         self.train_loader = DataLoader(tensorset_train, batch_size=self.batch_size, shuffle=True)
         self.test_loader = DataLoader(tensorset_test, batch_size=self.batch_size, shuffle=False)
+        if self.val_idx is not None:
+            self.val_loader = DataLoader(tensorset_val, batch_size=self.batch_size, shuffle=False)
+        else:
+            self.val_loader = None
 
     def example_inp(self):
         """

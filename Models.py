@@ -541,7 +541,7 @@ class CR_CNN_2D_seq(nn.Module):
         
         # Distance x -- convolution2
         x2 = x2.unsqueeze(1)
-        x2 = self.convolution1(x2)
+        x2 = self.convolution2(x2)
         x2 = torch.flatten(x2, 1)
         
         # Combine CR x after convolution2 with logits from first strand
@@ -705,7 +705,7 @@ class CRds_CNN_2D_seq(nn.Module):
         
         # Distance x -- convolution2
         x2 = x2.unsqueeze(1)
-        x2 = self.convolution1(x2)
+        x2 = self.convolution2(x2)
         x2 = torch.flatten(x2, 1)
         
         # Combine CR x after convolution2 with logits from first strand

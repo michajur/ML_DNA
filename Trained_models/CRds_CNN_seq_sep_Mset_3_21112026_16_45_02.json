@@ -1,7 +1,7 @@
 {
     "model": "CRds_CNN",
     "model_family": "cr_ds",
-    "with_seq": false,
+    "with_seq": true,
     "y_form": "separate",
     "model_parameters": {
         "hidden_sizes": [
@@ -39,8 +39,14 @@
     },
     "test_pred_config": {
         "sep_nts": true,
-        "ds_out": true
+        "ds_out": true,
+        "label_mapping": {
+            "0": "A",
+            "1": "G",
+            "2": "C",
+            "3": "T"
+        }
     },
-    "training_time": 2152.855257987976,
-    "test_accuracy": 0.26775
+    "training_time": 2057.322840690613,
+    "test_accuracy": 0.26136690647482014
 }

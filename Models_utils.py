@@ -1,3 +1,5 @@
+import re
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -108,14 +110,14 @@ def conv_out_size(
     diletions,
     reductions
 ):
-    if all(
-        # TODO: fix len checking
+    if any(
         [
             len(kernels) != len(i) 
-            for i in [strides, paddings, diletions]
+            for i in [strides, paddings, diletions, reductions]
         ]
     ):
-        raise ValueError("All entries must have the same size.")
+        raise ValueError("kernels, strides, paddings, diletions, and\
+                          reductions entries must have the same size.")
 
 
     if isinstance(inp_size, int):
@@ -129,7 +131,7 @@ def conv_out_size(
         reductions
     ):
         out1 = ((inp_size[0] + 2 * p[0] - d[0] * (k[0] - 1) - 1) / s[0] + 1) // r[0]
-        out2 = ((inp_size[1] + 2 * p[1] - d[1] * (k[1] - 1) - 1) / s[1] + 1) // r[0]
+        out2 = ((inp_size[1] + 2 * p[1] - d[1] * (k[1] - 1) - 1) / s[1] + 1) // r[1]
         inp_size = (int(out1), int(out2))
 
     return inp_size

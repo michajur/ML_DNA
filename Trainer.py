@@ -19,8 +19,9 @@ class trainer:
         criterion,
         train_loader,
         test_loader,
-        epochs,
-        device,
+        val_loader=None,
+        epochs=1,
+        device='cpu',
         info=None
     ):
         self.device = torch.device(device)
@@ -31,6 +32,7 @@ class trainer:
         #self.scheduler = MultiStepLR(self.optimizer, milestones=[5, 10, 15], gamma=0.2)
         self.train_loader = train_loader
         self.test_loader = test_loader
+        self.val_loader = val_loader
         self.epochs = epochs 
         self.info = info if info is not None else {}
         self.training_report = []
@@ -50,7 +52,11 @@ class trainer:
         return stop
 
     def train(self):
+
         start_time = time.time()
+
+        val_set = self.val_loader if self.val_loader is not None else self.test_loader
+
         for epo in range(1, self.epochs + 1):
 
             self.model.train()
@@ -82,14 +88,14 @@ class trainer:
             test_loss = 0
         
             with torch.no_grad():
-                for batch in self.test_loader:
+                for batch in val_set:
                     x = [t.to(self.device) for t in batch[:-1]]
                     y = batch[-1].to(self.device)
                     
                     t_loss = self.criterion(self.model(*x), y)
                     test_loss += t_loss.item()
                     
-            test_loss_norm = test_loss / len(self.test_loader)
+            test_loss_norm = test_loss / len(val_set)
             report_string_test = f"Loss on test set: {test_loss_norm}\n"
             self.test_losses.append(test_loss_norm)
             self.training_report.append(report_string_test)
