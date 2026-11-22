@@ -1,0 +1,32 @@
+{
+    "model": "CRds_MLP",
+    "model_family": "cr_ds",
+    "with_seq": true,
+    "y_form": "separate",
+    "model_parameters": {
+        "hidden_sizes": [
+            1024,
+            512,
+            128,
+            64
+        ],
+        "logits_dropout": 0.0,
+        "detach_logits": true
+    },
+    "loss_function": "CRConsistency",
+    "loss_parameters": {
+        "consistency_weight": 0.3
+    },
+    "test_pred_config": {
+        "sep_nts": true,
+        "ds_out": true,
+        "label_mapping": {
+            "0": "A",
+            "1": "G",
+            "2": "C",
+            "3": "T"
+        }
+    },
+    "training_time": 1661.4664912223816,
+    "test_accuracy": 0.22207434052757793
+}
