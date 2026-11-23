@@ -6,4 +6,7 @@ TODO.txt
 old_stuff.py
 code_notes.txt
 dist_mat_sample100/
+dist_mat_sample500/
+tmp_zipped_datasets/
 Trained_old/
+data/dist_mat_sample100/

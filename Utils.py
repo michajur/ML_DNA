@@ -1,3 +1,8 @@
+from urllib.request import urlretrieve
+from urllib.parse import urlsplit
+from zipfile import ZipFile
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -12,6 +17,72 @@ COMP_DICT = {
     "G": "C",
     "C": "G"
 }
+
+# URLs to datasets 
+URL_100 = "https://zenodo.org/records/24473393/files/dist_mat_sample100.zip?download=1"
+URL_500 = "https://zenodo.org/records/24473393/files/dist_mat_sample500.zip?download=1"
+
+############################
+### DOWNLOADING DATASETS ###
+############################
+
+def download_zenodo_zip(dataset_id, data_dir):
+    """
+    Function downloads datasets and returns path to 
+    dataset directory. If dataset directory exists and 
+    contain 2080 .npz only returns path to it.
+    Input:
+
+    dataset_id -- must be '100' or '500' selects dataset 
+    with 100 or 500 samples per hexamer.
+
+    data_dir -- parent directory for dataset direcotries 
+
+    Returns:
+    Path (PosixPath) to dataset direcotry
+    """
+
+    if dataset_id == '100':
+        url = URL_100
+        mat_dir = Path(urlsplit(URL_100).path).stem
+    elif dataset_id == '500':
+        url = URL_500
+        mat_dir = Path(urlsplit(URL_500).path).stem
+    else:
+        raise ValueError(f"dataset_id must be '100' or '500', not {dataset_id}.")
+
+    data_dir = Path(data_dir)
+    output_dir = data_dir / Path(mat_dir)
+    
+    if not output_dir.exists():
+        if not data_dir.exists():
+            data_dir.mkdir(parents=True, exist_ok=True)
+    else:
+        n_npz_files = len(list(output_dir.glob("*.npz")))
+        if n_npz_files == 2080:
+            print(f"2080 distance matrix files already exist in {output_dir}")
+            return output_dir
+        else:
+            print(f"Found {n_npz_files} .npz files in {output_dir}. Incomplete dataset. \n"\
+                  f"Remove entire {output_dir} directory manually and then rerun download.")
+            return 0
+
+        
+    zip_path = data_dir / Path(urlsplit(url).path).name
+
+    # Download archive
+    urlretrieve(url, zip_path)
+
+    # Extract files
+    with ZipFile(zip_path, "r") as z:
+        z.extractall(data_dir)
+
+    # Remove .zip file after extraction
+    zip_path.unlink()
+
+    return output_dir
+
+
 
 ####################################
 ### DATA LOADING AND PREPARATION ###
