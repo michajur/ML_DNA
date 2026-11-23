@@ -1,0 +1,50 @@
+{
+    "model": "CNN",
+    "model_family": "standard",
+    "with_seq": true,
+    "y_form": "separate",
+    "model_parameters": {
+        "hidden_sizes": [
+            128,
+            64
+        ],
+        "conv_channels": [
+            16,
+            32,
+            64
+        ],
+        "kern_sizes": [
+            [
+                3,
+                3
+            ],
+            [
+                3,
+                3
+            ],
+            [
+                3,
+                3
+            ]
+        ],
+        "pool_bias": false,
+        "pool_act": "ReLU",
+        "pool_normW": false
+    },
+    "loss_function": "Enhanced",
+    "loss_parameters": {
+        "pair_weight": 0.25
+    },
+    "test_pred_config": {
+        "sep_nts": true,
+        "ds_out": false,
+        "label_mapping": {
+            "0": "A",
+            "1": "G",
+            "2": "C",
+            "3": "T"
+        }
+    },
+    "training_time": 633.4227931499481,
+    "test_accuracy": 0.2573381294964029
+}

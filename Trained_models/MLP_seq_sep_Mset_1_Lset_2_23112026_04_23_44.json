@@ -1,0 +1,31 @@
+{
+    "model": "MLP",
+    "model_family": "standard",
+    "with_seq": true,
+    "y_form": "separate",
+    "model_parameters": {
+        "hidden_sizes": [
+            1024,
+            512,
+            128,
+            64
+        ],
+        "pool_act": "ReLU"
+    },
+    "loss_function": "Enhanced",
+    "loss_parameters": {
+        "pair_weight": 0.5
+    },
+    "test_pred_config": {
+        "sep_nts": true,
+        "ds_out": false,
+        "label_mapping": {
+            "0": "A",
+            "1": "G",
+            "2": "C",
+            "3": "T"
+        }
+    },
+    "training_time": 467.27912759780884,
+    "test_accuracy": 0.22980815347721822
+}

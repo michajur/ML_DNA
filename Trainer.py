@@ -51,6 +51,19 @@ class trainer:
                 stop = True
         return stop
 
+
+    def _check_info(self, out=True):
+        if self.info.get("model_parameters") is not None:
+            if self.info["model_parameters"].get("pool_act") is not None:
+                if out:
+                    act_str = self.info["model_parameters"]["pool_act"].__class__.__name__
+                    self.info["model_parameters"]["pool_act"] = act_str
+                else:
+                    act_str = self.info["model_parameters"]["pool_act"]
+                    act_func = getattr(torch.nn, act_str)(inplace=False)
+                    self.info["model_parameters"]["pool_act"] = act_func
+
+
     def train(self):
 
         start_time = time.time()
@@ -235,6 +248,7 @@ class trainer:
                 #    for i in ["model", "model_family", "with_seq", "y_form"]
                 #)
                 #info_file = f"{Path(path).stem}_{file_suffix}_{timestamp}.json"
+                self._check_info(out=True)
                 
                 info_file = f"{Path(path).stem}_{self.timestamp}.json"
                 info_path = Path(path).parent / info_file
@@ -264,3 +278,4 @@ class trainer:
         if info_path is not None:
             with open(info_path, "r") as f:
                 self.info = json.load(f)
+            self._check_info(out=False)
